@@ -15,7 +15,7 @@ async function main() {
       data: {
         email: faker.internet.email().toLowerCase(),
         name: faker.person.fullName(),
-        password: bcrypt.hashSync(`password${i}`, bcryptRound)
+        password: bcrypt.hashSync('password', bcryptRound)
       }
     })
   }

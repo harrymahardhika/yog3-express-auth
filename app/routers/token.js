@@ -1,8 +1,8 @@
-import { Router } from 'express'
-import { validateTokenRequest } from '../validators.js'
-import prisma from '../prisma.js'
 import bcrypt from 'bcrypt'
-import randomstring from 'randomstring'
+import crypto from 'crypto'
+import { Router } from 'express'
+import prisma from '../prisma.js'
+import { validateTokenRequest } from '../validators.js'
 
 const router = Router()
 
@@ -17,6 +17,12 @@ router.post('/token', validateTokenRequest, async (req, res) => {
     })
   }
 
+  if (user.is_blocked) {
+    return res.status(401).json({
+      message: 'User is blocked'
+    })
+  }
+
   const validPassword = bcrypt.compareSync(req.body.password, user.password)
 
   if (!validPassword) {
@@ -25,12 +31,16 @@ router.post('/token', validateTokenRequest, async (req, res) => {
     })
   }
 
-  const token = randomstring.generate()
+  let token
+  do {
+    token = crypto.randomBytes(64).toString('base64')
+  } while (await prisma.token.findUnique({ where: { token } }))
+
   await prisma.token.create({
     data: {
       token,
       user_id: user.id,
-      expires_at: new Date(Date.now() + 31536000000)
+      expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
     }
   })
 
