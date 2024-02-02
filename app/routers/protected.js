@@ -1,16 +1,27 @@
 import { Router } from 'express'
-import { authToken } from '../middlewares.js'
+import { Permission } from '../authorization.js'
+import { authToken, authorizePermission } from '../middlewares.js'
 
 const router = Router()
 
-router.get('/protected', authToken, async (req, res) => {
-  // const posts = await prisma.post.findMany({
-  //   where: { user_id: req.user.id }
-  // })
+router.use(authToken)
 
+router.get('/protected', authorizePermission(Permission.ADD_BOOK), async (req, res) => {
   res.json({
     message: 'You have successfully accessed the protected route!',
     currentUser: req.user
+  })
+})
+
+router.get('/books', authorizePermission(Permission.BROWSE_BOOKS), async (req, res) => {
+  res.json({
+    message: 'You have successfully accessed the books route!'
+  })
+})
+
+router.post('/books', authorizePermission(Permission.ADD_BOOK), async (req, res) => {
+  res.json({
+    message: 'You have successfully accessed the books route!'
   })
 })
 

@@ -1,7 +1,6 @@
 import prisma from './prisma.js'
 
 export const authToken = async (req, res, next) => {
-  // const token = req.headers['authorization']
   const token = req.headers.authorization
 
   if (!token) {
@@ -18,7 +17,8 @@ export const authToken = async (req, res, next) => {
           id: true,
           email: true,
           name: true,
-          is_blocked: true
+          is_blocked: true,
+          role_id: true
         }
       }
     }
@@ -45,4 +45,29 @@ export const authToken = async (req, res, next) => {
   req.user = validToken.user
 
   next()
+}
+
+export const authorizePermission = (permission) => {
+  return async (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({
+        message: 'Unauthorized'
+      })
+    }
+
+    const permissionRecords = await prisma.permissionRole.findMany({
+      where: { role_id: req.user.role_id },
+      include: { permission: true }
+    })
+
+    const permissions = permissionRecords.map((record) => record.permission.name)
+
+    if (!permissions.includes(permission)) {
+      return res.status(403).json({
+        message: 'Forbidden'
+      })
+    }
+
+    next()
+  }
 }
