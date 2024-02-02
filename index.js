@@ -1,9 +1,5 @@
-import { PermissionAssignment } from './app/authorization.js'
+import { Role, Permission, PermissionAssignment } from './app/authorization.js'
 
-Object.keys(PermissionAssignment).forEach(async (role) => {
-  console.log('->', role)
-
-  PermissionAssignment[role].forEach(async (permission) => {
-    console.log(permission)
-  })
-})
+console.log(Role.ADMINISTRATOR)
+console.log(Permission.BROWSE_BOOKS)
+console.log(PermissionAssignment.regular_user)

@@ -2,6 +2,7 @@ import prisma from '../app/prisma.js'
 import { Role, Permission, PermissionAssignment } from '../app/authorization.js'
 
 const main = async () => {
+  await prisma.user.deleteMany()
   await prisma.permissionRole.deleteMany()
   await prisma.role.deleteMany()
   await prisma.permission.deleteMany()
@@ -23,23 +24,46 @@ const main = async () => {
   }
 
   for (const role in PermissionAssignment) {
+    const roleRecord = await prisma.role.findUnique({
+      where: {
+        name: role
+      }
+    })
+
     for (const permission of PermissionAssignment[role]) {
+      const permissionRecord = await prisma.permission.findUnique({
+        where: {
+          name: permission
+        }
+      })
+
       await prisma.permissionRole.create({
         data: {
-          role: {
-            connect: {
-              name: role
-            }
-          },
-          permission: {
-            connect: {
-              name: permission
-            }
-          }
+          role_id: roleRecord.id,
+          permission_id: permissionRecord.id
         }
       })
     }
   }
+
+  // for (const role in PermissionAssignment) {
+  //   for (const permission of PermissionAssignment[role]) {
+  //     await prisma.permissionRole.create({
+  //       data: {
+  //         role: {
+  //           connect: {
+  //             name: role
+  //           }
+  //         },
+  //         permission: {
+  //           connect: {
+  //             name: permission
+  //           }
+  //         }
+  //       }
+  //     })
+  //   }
+  // }
 }
 
 main().catch((e) => {
