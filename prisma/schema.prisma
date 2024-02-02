@@ -16,10 +16,12 @@ model User {
   name       String
   password   String
   is_blocked Boolean  @default(false)
+  role_id    Int
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
   tokens Token[]
+  role   Role    @relation(fields: [role_id], references: [id])
 
   @@map("users")
 }
@@ -35,4 +37,38 @@ model Token {
   user User @relation(fields: [user_id], references: [id])
 
   @@map("tokens")
+}
+
+model Role {
+  id         Int      @id @default(autoincrement())
+  name       String   @unique
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  users       User[]
+  permissions PermissionRole[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id         Int      @id @default(autoincrement())
+  name       String   @unique
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  roles PermissionRole[]
+
+  @@map("permissions")
+}
+
+model PermissionRole {
+  permission_id Int
+  role_id       Int
+
+  permission Permission @relation(fields: [permission_id], references: [id])
+  role       Role       @relation(fields: [role_id], references: [id])
+
+  @@id([permission_id, role_id])
+  @@map("permission_role")
 }
