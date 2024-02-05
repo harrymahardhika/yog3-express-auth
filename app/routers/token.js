@@ -31,6 +31,7 @@ router.post('/token', validateTokenRequest, async (req, res) => {
     })
   }
 
+  // generate a token that is not already exists in the database
   let token
   do {
     token = crypto.randomBytes(64).toString('base64')
@@ -40,11 +41,18 @@ router.post('/token', validateTokenRequest, async (req, res) => {
     data: {
       token,
       user_id: user.id,
-      expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
+      expires_at: new Date(Date.now() + 2592000000) // 30 days
     }
   })
 
-  res.json({ token })
+  res.json({
+    token,
+    user: {
+      id: user.id,
+      email: user.email,
+      name: user.name
+    }
+  })
 })
 
 export default router

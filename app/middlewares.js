@@ -1,6 +1,7 @@
 import prisma from './prisma.js'
 
 export const authToken = async (req, res, next) => {
+  console.log(req.head)
   const token = req.headers.authorization
 
   if (!token) {
